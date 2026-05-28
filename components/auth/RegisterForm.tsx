@@ -29,6 +29,8 @@ export function RegisterForm() {
   const [errors, setErrors] = useState<Partial<RegisterFormData>>({})
   const [loading, setLoading] = useState(false)
  const { setAuth } = useAuthStore()
+
+
   // Mise à jour d'un champ
   function handleChange(field: keyof RegisterFormData, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -60,19 +62,28 @@ export function RegisterForm() {
     if (!validate()) return
 
     setLoading(true)
-    try {
-      // ← ICI on appellera POST /api/v1/auth/register
-      // Pour l'instant on simule
-      const res = await register(form)
-      setAuth(res.user, res.token)
-      router.push("/setup")
+   try {
+     const response = await register(form)
 
-    } catch {
+
+  useAuthStore.getState().setAuth(
+  {
+    id: response.userId,
+    nom: response.nom,
+    email: response.email,
+    role: response.role,
+    tenantId: response.tenantId,
+    plan: response.plan,
+  },
+  response.token
+)
+     router.push("/setup")
+    }catch {
       setErrors({ email: "Une erreur est survenue. Réessayez." })
     } finally {
+    }
       setLoading(false)
     }
-  }
 
   return (
     <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-7">

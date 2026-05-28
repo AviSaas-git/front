@@ -1,52 +1,72 @@
 import axios from "axios"
 
-// L'URL de ton API Spring Boot
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"
+// URL API Spring Boot
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10_000, // 10 secondes max
+  timeout: 10000,
 })
 
-// ── INTERCEPTEUR REQUEST ─────────────────────────────────────────────────
-// Ajoute automatiquement le JWT à chaque requête
+// ─────────────────────────────────────────────
+// INTERCEPTEUR REQUEST
+// ─────────────────────────────────────────────
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("avisaas_token")
+  // Vérifie qu'on est côté navigateur
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("avisaas_token")
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    console.log(
+      "Token envoyé : 45",
+      token ? token.substring(0, 20) + "..." : "AUCUN"
+    )
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
   }
 
   return config
 })
 
-// ── INTERCEPTEUR RESPONSE ────────────────────────────────────────────────
-// Gère les erreurs globalement
+// ─────────────────────────────────────────────
+// INTERCEPTEUR RESPONSE
+// ─────────────────────────────────────────────
 apiClient.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    // Token expiré → déconnexion automatique
-    if (error.response?.status === 401) {
-      localStorage.removeItem("avisaas_token")
-      localStorage.removeItem("avisaas_user")
-      window.location.href = "/login"
+    if (typeof window !== "undefined") {
+
+      // JWT expiré
+      if (error.response?.status === 401) {
+        localStorage.removeItem("avisaas_token")
+        localStorage.removeItem("avisaas_user")
+
+        window.location.href = "/login"
+      }
     }
 
-    // Quota dépassé → message métier
+    // Erreur métier
     if (error.response?.status === 422) {
       return Promise.reject(
-        new Error(error.response.data?.message ?? "Règle métier non respectée")
+        new Error(
+          error.response.data?.message ??
+          "Règle métier non respectée"
+        )
       )
     }
 
-    // Erreur serveur générique
+    // Erreur serveur
     if (error.response?.status >= 500) {
       return Promise.reject(
-        new Error("Erreur serveur. Réessayez dans quelques instants.")
+        new Error(
+          "Erreur serveur. Réessayez dans quelques instants."
+        )
       )
     }
 

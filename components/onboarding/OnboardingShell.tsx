@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { StepFerme }    from "./StepFerme"
 import { StepBatiment } from "./StepBatiment"
 import type { FermeFormData } from "@/lib/types/forms"
+import { useAuthStore } from "@/lib/store/auth"
 
 // Les étapes disponibles
 type Step = "ferme" | "batiment"
@@ -12,6 +13,10 @@ export function OnboardingShell() {
   const [step, setStep]           = useState<Step>("ferme")
   const [fermeId, setFermeId]     = useState<string | null>(null)
   const [fermeName, setFermeName] = useState<string>("")
+
+    // ← Recharge le user depuis localStorage au montage
+   const hydrate = useAuthStore((s) => s.hydrate)
+   useEffect(() => { hydrate() }, [hydrate])
 
   function handleFermeDone(id: string, nom: string) {
     setFermeId(id)

@@ -26,4 +26,5 @@ export type BatimentFormData = {
   surfaceM2?:    number
   typeChauffage?: string
   type:          string
+  tenantId?: string
 }

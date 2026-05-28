@@ -36,12 +36,10 @@ export function LoginForm() {
 
     setLoading(true)
     try {
-      // ← ICI on appellera POST /api/v1/auth/login
-      const res = await login(form)
-      setAuth(res.user, res.token)
-      router.push("/dashboard")
-      
-    } catch {
+     const response = await login(form)
+      useAuthStore.getState().setAuth(response.user, response.token)
+     router.push("/dashboard")
+    }catch {
       setErrors({ password: "Email ou mot de passe incorrect" })
     } finally {
       setLoading(false)

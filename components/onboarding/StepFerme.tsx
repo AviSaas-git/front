@@ -56,10 +56,8 @@ export function StepFerme({ onDone }: Props) {
 
     setLoading(true)
     try {
-      // ← ICI : POST /api/v1/fermes { ...form }
-      // Le JWT dans le header identifie le tenant automatiquement
-    const ferme = await creerFerme(form)
-    onDone(ferme.id, ferme.nom)
+      const ferme = await creerFerme(form)
+      onDone(ferme.id, ferme.nom)
     } catch {
       setErrors({ nom: "Erreur serveur. Réessayez." })
     } finally {

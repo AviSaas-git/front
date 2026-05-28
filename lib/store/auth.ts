@@ -1,29 +1,57 @@
-import { create }       from "zustand"
-import { persist }      from "zustand/middleware"
-import type { AuthUser } from "@/lib/api/auth"
+import { create } from "zustand"
 
-type AuthStore = {
-  user:      AuthUser | null
-  token:     string | null
-  setAuth:   (user: AuthUser, token: string) => void
-  clearAuth: () => void
-  isAuth:    () => boolean
+type User = {
+  id:       string
+  nom:      string
+  email:    string
+  role:     string
+  tenantId: string
+  plan:     string
 }
 
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set, get) => ({
-      user:  null,
-      token: null,
+type AuthStore = {
+  user:     User | null
+  token:    string | null
+  isLogged: boolean
+  setAuth:  (user: User, token: string) => void
+  logout:   () => void
+  hydrate:  () => void  // ← recharge depuis localStorage
+}
 
-      setAuth: (user, token) => set({ user, token }),
+export const useAuthStore = create<AuthStore>((set) => ({
+  user:     null,
+  token:    null,
+  isLogged: false,
 
-      clearAuth: () => set({ user: null, token: null }),
+  setAuth: (user, token) => {
+    // Persiste les deux dans localStorage
+    localStorage.setItem("avisaas_token", token)
+    localStorage.setItem("avisaas_user", JSON.stringify(user))
+     console.log("Token sauvegardé :", token.substring(0, 20) + "...")
+    set({ user, token, isLogged: true })
+  },
 
-      isAuth: () => !!get().token,
-    }),
-    {
-      name: "avisaas-auth", // clé localStorage
+  logout: () => {
+    localStorage.removeItem("avisaas_token")
+    localStorage.removeItem("avisaas_user")
+    set({ user: null, token: null, isLogged: false })
+  },
+
+  // Appelée au montage des pages protégées
+  hydrate: () => {
+    const token = localStorage.getItem("avisaas_token")
+    const raw   = localStorage.getItem("avisaas_user")
+    if (token && raw) {
+      try {
+        const user = JSON.parse(raw) as User
+        set({ user, token, isLogged: true })
+
+       // console.log("auth "+ user + "token" + token)
+      } catch {
+        // JSON corrompu → on nettoie
+        localStorage.removeItem("avisaas_token")
+        localStorage.removeItem("avisaas_user")
+      }
     }
-  )
-)
+  },
+}))

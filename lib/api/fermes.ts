@@ -13,6 +13,7 @@ export type Ferme = {
 
 export async function creerFerme(data: FermeFormData): Promise<Ferme> {
   const res = await apiClient.post<Ferme>("/api/v1/fermes", data)
+  console.log(res)
   return res.data
 }
 

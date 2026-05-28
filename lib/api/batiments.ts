@@ -13,12 +13,19 @@ export type Batiment = {
 
 export async function creerBatiment(
   fermeId: string,
+  tenantId: string, //
   data: BatimentFormData
 ): Promise<Batiment> {
   const res = await apiClient.post<Batiment>(
     "/api/v1/batiments",
-    { ...data, fermeId }
+    { 
+      ...data, 
+      fermeId, 
+      tenantId // 💡 Lié ici à l'objet final envoyé au backend Spring Boot
+    }
   )
+
+  console.log(res)
   return res.data
 }
 
