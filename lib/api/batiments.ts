@@ -11,6 +11,14 @@ export type Batiment = {
   type:          string
 }
 
+export type BatimentData = {
+  id:       string
+  nom:      string
+  capacite: number
+  type:     string
+  fermeId:  string
+}
+
 export async function creerBatiment(
   fermeId: string,
   tenantId: string, //
@@ -33,5 +41,12 @@ export async function listerBatiments(fermeId: string): Promise<Batiment[]> {
   const res = await apiClient.get<Batiment[]>(
     `/api/v1/batiments?fermeId=${fermeId}`
   )
+  return res.data
+}
+
+export async function fetchBatiments(): Promise<BatimentData[]> {
+  const res = await apiClient.get<BatimentData[]>("/api/v1/batiments")
+
+  console.log(" res batiment : "+ res)
   return res.data
 }

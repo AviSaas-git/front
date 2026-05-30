@@ -1,4 +1,5 @@
 import type { EspeceConfig } from "@/lib/types/elevage"
+import { useEffect, useState } from "react"
 
 type Props = {
   espece:     EspeceConfig

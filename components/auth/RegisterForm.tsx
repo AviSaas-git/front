@@ -64,7 +64,8 @@ export function RegisterForm() {
     setLoading(true)
    try {
      const response = await register(form)
-
+    console.log("REPONSE AUTH =", response)
+    console.log("TOKEN =", response.token)
 
   useAuthStore.getState().setAuth(
   {
@@ -77,6 +78,11 @@ export function RegisterForm() {
   },
   response.token
 )
+
+    console.log(
+      "TOKEN DANS STORAGE",
+      localStorage.getItem("avisaas_token")
+    )
      router.push("/setup")
     }catch {
       setErrors({ email: "Une erreur est survenue. Réessayez." })

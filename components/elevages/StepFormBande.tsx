@@ -1,23 +1,25 @@
 "use client"
 
-import { useState }      from "react"
-import { useRouter }     from "next/navigation"
-import { FormField }     from "@/components/ui/FormField"
-import { BATIMENTS_MOCK } from "@/lib/constants/especes"
-import type { EspeceConfig, BandeFormData } from "@/lib/types/elevage"
-import { demarrerElevage } from "@/lib/api/elevages"
+import { useState }        from "react"
+import { useRouter }       from "next/navigation"
+import { useQuery }        from "@tanstack/react-query"
+import { useQueryClient }  from "@tanstack/react-query"
+import { FormField }       from "@/components/ui/FormField"
+import { createBande }     from "@/lib/api/bandes"
+import { fetchBatiments }  from "@/lib/api/batiments"
+import type { EspeceRef }  from "@/lib/api/bandes"
+import type { BandeFormData } from "@/lib/types/elevage"
 
 type Props = {
-  espece: EspeceConfig
+  espece: EspeceRef
   onBack: () => void
 }
-
-type BandeErrors = Partial<Record<keyof BandeFormData, string>>
 
 const today = new Date().toISOString().split("T")[0]
 
 export function StepFormBande({ espece, onBack }: Props) {
-  const router = useRouter()
+  const router       = useRouter()
+  const queryClient  = useQueryClient()
 
   const [form, setForm] = useState<BandeFormData>({
     especeId:        espece.id,
@@ -28,36 +30,35 @@ export function StepFormBande({ espece, onBack }: Props) {
     fournisseur:     "",
   })
 
-  const [errors, setErrors]   = useState<BandeErrors>({})
+  const [errors, setErrors]   = useState<Partial<BandeFormData>>({})
   const [loading, setLoading] = useState(false)
 
-  function handleChange(field: keyof BandeFormData, value: string) {
-    const parsed =
-      field === "effectifInitial" ? Number(value) : value
+  // Charge les vrais bâtiments depuis l'API
+  const { data: batiments = [] } = useQuery({
+    queryKey: ["batiments"],
+    queryFn:  fetchBatiments,
+  })
 
+
+console.log("BATIMENTS =", batiments)
+
+  function handleChange(field: keyof BandeFormData, value: string) {
+    const parsed = field === "effectifInitial" ? Number(value) : value
     setForm((prev) => ({ ...prev, [field]: parsed }))
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
+    if (errors[field as keyof typeof errors]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }))
+    }
   }
 
   function validate(): boolean {
-    const next: BandeErrors = {}
-
-    if (!form.batimentId)
-      next.batimentId = "Sélectionnez un bâtiment"
-
-    if (!form.effectifInitial || form.effectifInitial <= 0)
+    const next: Partial<BandeFormData> = {}
+    if (!form.batimentId)           next.batimentId = "Sélectionnez un bâtiment"
+    if (!form.effectifInitial || form.effectifInitial <= 0) 
       next.effectifInitial = "Effectif invalide"
-
-    // Vérifie que l'effectif ne dépasse pas la capacité
-    const bat = BATIMENTS_MOCK.find((b) => b.id === form.batimentId)
-    if (bat && form.effectifInitial > bat.capacite) {
-      next.effectifInitial =
-        `Dépasse la capacité du bâtiment (${bat.capacite} places)`
-    }
-
-    if (!form.dateArrivee)
-      next.dateArrivee = "Date obligatoire"
-
+    const bat = batiments.find((b) => b.id === form.batimentId)
+    if (bat && form.effectifInitial > bat.capacite)
+      next.effectifInitial = `Dépasse la capacité (${bat.capacite} places)`
+    if (!form.dateArrivee)          next.dateArrivee = "Date obligatoire"
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -68,26 +69,36 @@ export function StepFormBande({ espece, onBack }: Props) {
 
     setLoading(true)
     try {
-      // ← ICI : POST /api/v1/elevages/demarrer { ...form }
-      await demarrerElevage(form)
+      await createBande({
+        especeId:        form.especeId,
+        batimentId:      form.batimentId,
+        effectifInitial: form.effectifInitial,
+        race:            form.race ?? "",
+        dateArrivee:     form.dateArrivee,
+        fournisseur:     form.fournisseur ?? "",
+      })
+      // Invalide le cache dashboard pour forcer le rechargement
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: ["bandes"] })
       router.push("/dashboard")
-    } catch {
-      setErrors({ batimentId: "Erreur serveur. Réessayez." })
+    } catch (err: any) {
+      const msg = err.response?.data?.message ?? "Erreur serveur."
+      setErrors({ batimentId: msg })
     } finally {
       setLoading(false)
     }
   }
 
-  const batimentOptions = BATIMENTS_MOCK.map((b) => ({
-    value: b.id,
-    label: `${b.nom} — ${b.capacite} places`,
-  }))
+  const batimentOptions = [
+    { value: "", label: "Sélectionner un bâtiment…" },
+    ...batiments.map((b) => ({
+      value: b.id,
+      label: `${b.nom} — ${b.capacite} places`,
+    })),
+  ]
 
   return (
-    <div className="bg-white/[0.03] border border-white/8
-                    rounded-2xl p-6">
-
-      {/* Barre de progression */}
+    <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-6">
       <div className="flex gap-1.5 mb-4">
         <div className="flex-1 h-px bg-green-400 rounded-full" />
         <div className="flex-1 h-px bg-green-400 rounded-full" />
@@ -97,43 +108,35 @@ export function StepFormBande({ espece, onBack }: Props) {
         <span className="text-white/60 font-medium">2</span>
       </p>
 
-      {/* Badge espèce */}
-      <div className="inline-flex items-center gap-2
-                      bg-blue-400/8 border border-blue-400/15
-                      text-blue-300 px-3 py-1 rounded-full
-                      text-xs font-medium mb-4">
+      <div className="inline-flex items-center gap-2 bg-blue-400/8
+                      border border-blue-400/15 text-blue-300 px-3 py-1
+                      rounded-full text-xs font-medium mb-4">
         <span>{espece.icon}</span>
         <span>{espece.nom} · Mode LOT</span>
       </div>
 
-      {/* Info box */}
-      <div className="flex gap-2.5 bg-blue-400/[0.06]
-                      border border-blue-400/[0.12]
-                      rounded-xl p-3 mb-5 text-xs
-                      text-blue-200/70 leading-relaxed">
+      <div className="flex gap-2.5 bg-blue-400/[0.06] border
+                      border-blue-400/[0.12] rounded-xl p-3 mb-5
+                      text-xs text-blue-200/70 leading-relaxed">
         <span className="shrink-0 mt-0.5">ℹ</span>
         <span>
-          En mode LOT, vous gérez un groupe d&apos;oiseaux ensemble.
-          Saisissez l&apos;effectif total à l&apos;arrivée des poussins.
+          Mode LOT : vous gérez un groupe d'oiseaux ensemble.
+          Saisissez l'effectif total à l'arrivée.
         </span>
       </div>
 
       <h1 className="text-lg font-medium text-white mb-1.5">
         Nouvelle bande
       </h1>
-      <p className="text-sm text-white/40 mb-5">
-        Informations de base de votre bande de {espece.nom}.
-      </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-
         <FormField
           as="select"
           label="Bâtiment d'accueil"
-          options={[{ value: "", label: "Sélectionner un bâtiment…" }, ...batimentOptions]}
+          options={batimentOptions}
           value={form.batimentId}
           onChange={(e) => handleChange("batimentId", e.target.value)}
-          error={errors.batimentId}
+          error={errors.batimentId as string}
         />
 
         <div className="grid grid-cols-2 gap-3">
@@ -143,7 +146,7 @@ export function StepFormBande({ espece, onBack }: Props) {
             placeholder="Ex : 5 000"
             value={form.effectifInitial || ""}
             onChange={(e) => handleChange("effectifInitial", e.target.value)}
-            error={errors.effectifInitial}
+            error={errors.effectifInitial as string}
           />
           <FormField
             label="Race"
@@ -155,11 +158,11 @@ export function StepFormBande({ espece, onBack }: Props) {
         </div>
 
         <FormField
-          label="Date d'arrivée des poussins"
+          label="Date d'arrivée"
           type="date"
           value={form.dateArrivee}
           onChange={(e) => handleChange("dateArrivee", e.target.value)}
-          error={errors.dateArrivee}
+          error={errors.dateArrivee as string}
         />
 
         <FormField

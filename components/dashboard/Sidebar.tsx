@@ -3,11 +3,12 @@
 import Link        from "next/link"
 import { usePathname } from "next/navigation"
 import { NAV_ITEMS } from "@/lib/constants/dashboard"
+import { useAuthStore } from "@/lib/store/auth"
 
 export function Sidebar() {
     
   const pathname = usePathname()
-
+  const user = useAuthStore((s) => s.user)
   return (
     <aside className="w-52 border-r border-white/[0.07] flex
                       flex-col bg-[#09090b] shrink-0">
@@ -64,9 +65,14 @@ export function Sidebar() {
             JM
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-white/80 truncate">Jean Mbarga</p>
-            <p className="text-[10px] text-white/30">Plan Pro</p>
-          </div>
+              <p className="text-xs text-white/80 truncate">
+                {user?.nom ?? "Utilisateur"}
+              </p>
+
+              <p className="text-[10px] text-white/30">
+                Plan {user?.plan ?? "FREE"}
+              </p>
+            </div>
         </div>
       </div>
     </aside>

@@ -1,21 +1,30 @@
 "use client"
 
-import { useState }    from "react"
-import { EspeceCard }  from "./EspeceCard"
-import { ESPECES }     from "@/lib/constants/especes"
+import { useState } from "react"
+import { EspeceCard } from "./EspeceCard"
 import type { EspeceConfig } from "@/lib/types/elevage"
+import { useQuery } from "@tanstack/react-query"
+import { fetchEspeces } from "@/lib/api/bandes"
 
 type Props = {
-  onDone:  (espece: EspeceConfig) => void
+  onDone: (espece: EspeceConfig) => void
   onCancel: () => void
 }
 
 export function StepChoixEspece({ onDone, onCancel }: Props) {
   const [selected, setSelected] = useState<EspeceConfig | null>(null)
 
+  // 💡 TanStack Query récupère les vraies espèces (avec les UUIDs) depuis ton API Spring Boot
+  const { data: especes = [], isLoading } = useQuery({
+    queryKey: ["especes"],
+    queryFn: fetchEspeces,
+    staleTime: Infinity, // l'ID et la configuration des espèces ne changent pas en cours de session
+  })
+
+  
+
   return (
-    <div className="bg-white/[0.03] border border-white/8
-                    rounded-2xl p-6">
+    <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-6">
 
       {/* Barre de progression */}
       <div className="flex gap-1.5 mb-4">
@@ -34,17 +43,24 @@ export function StepChoixEspece({ onDone, onCancel }: Props) {
         L&apos;espèce détermine le mode de gestion et le formulaire suivant.
       </p>
 
-      {/* Grille espèces */}
-      <div className="grid grid-cols-2 gap-2.5 mb-5">
-        {ESPECES.map((esp) => (
-          <EspeceCard
-            key={esp.id}
-            espece={esp}
-            selected={selected?.id === esp.id}
-            onClick={() => setSelected(esp)}
-          />
-        ))}
-      </div>
+      {/* Écran de chargement optionnel pendant que l'API répond */}
+      {isLoading ? (
+        <div className="text-center text-xs text-white/40 my-10 py-4 animate-pulse">
+          Chargement des espèces depuis AviSaaS...
+        </div>
+      ) : (
+        /* Grille espèces chargées dynamiquement */
+        <div className="grid grid-cols-2 gap-2.5 mb-5">
+          {especes.map((esp) => (
+            <EspeceCard
+              key={esp.id} // C'est maintenant le vrai UUID de la BDD !
+              espece={esp}
+              selected={selected?.id === esp.id}
+              onClick={() => setSelected(esp)}
+            />
+          ))}
+        </div>
+      )}
 
       <button
         type="button"

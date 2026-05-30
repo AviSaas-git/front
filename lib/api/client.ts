@@ -16,12 +16,19 @@ export const apiClient = axios.create({
 // INTERCEPTEUR REQUEST
 // ─────────────────────────────────────────────
 apiClient.interceptors.request.use((config) => {
-  // Vérifie qu'on est côté navigateur
-  if (typeof window !== "undefined") {
+
+  // ✅ Routes publiques
+  const isAuthRoute =
+    config.url?.includes("/auth/login") ||
+    config.url?.includes("/auth/register")
+
+  // ✅ Ne pas envoyer le token sur login/register
+  if (!isAuthRoute && typeof window !== "undefined") {
+
     const token = localStorage.getItem("avisaas_token")
 
     console.log(
-      "Token envoyé : 45",
+      "Token envoyé : 123",
       token ? token.substring(0, 20) + "..." : "AUCUN"
     )
 
