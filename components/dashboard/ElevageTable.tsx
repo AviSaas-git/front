@@ -4,18 +4,24 @@ import { useQuery }      from "@tanstack/react-query"
 import { useState }      from "react"
 import { ProgressCell }  from "./ProgressCell"
 import { fetchBandes }   from "@/lib/api/bandes"
+import { useAuthStore }  from "@/lib/store/auth"
 import { STATUT_STYLES, MODE_STYLES } from "@/lib/constants/dashboard"
 
-export function ElevageTable() {
+type Props = { ready: boolean }
+
+export function ElevageTable({ ready }: Props) {
+  const token = useAuthStore((s) => s.token)
+
   const { data: bandes = [], isLoading } = useQuery({
     queryKey: ["bandes"],
     queryFn:  fetchBandes,
+    enabled:  ready && !!token,   // ← même garde que le dashboard
     staleTime: 30_000,
   })
 
   const [selected, setSelected] = useState<string | null>(null)
 
-  if (isLoading) {
+  if (!ready || isLoading) {
     return (
       <div className="space-y-2">
         {[...Array(3)].map((_, i) => (
@@ -51,7 +57,8 @@ export function ElevageTable() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              {["Référence","Espèce","Mode","Statut","Info clé","Progression"].map((h) => (
+              {["Référence","Espèce","Mode","Statut","Info clé","Progression"]
+                .map((h) => (
                 <th key={h}
                   className="text-left px-3 py-2.5 text-[10px] font-medium
                              text-white/25 border-b border-white/[0.06]

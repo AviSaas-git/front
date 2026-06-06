@@ -74,17 +74,17 @@ export const ALERTS: AlertItem[] = [
 ]
 
 export const NAV_ITEMS: NavItem[] = [
-  { section: "PRINCIPAL", label: "Tableau de bord", href: "/dashboard",    icon: "layout-dashboard" },
-  {                        label: "Bandes",          href: "/bandes",       icon: "feather"          },
-  {                        label: "Animaux",         href: "/animaux",      icon: "paw"              },
-  {                        label: "Santé",           href: "/sante",        icon: "heart-rate-monitor"},
-  {                        label: "Reproduction",    href: "/reproduction", icon: "dna"              },
-  { section: "GESTION",   label: "Stocks",          href: "/stocks",       icon: "package"          },
-  {                        label: "Rapports",        href: "/rapports",     icon: "report-analytics" },
-  { section: "CONFIG",    label: "Ferme & bâtiments", href: "/ferme",      icon: "building"         },
-  {                        label: "Paramètres",      href: "/parametres",   icon: "settings"         },
+  { section: "PRINCIPAL",  label: "Tableau de bord",    href: "/dashboard",        icon: "layout-dashboard"  },
+  {                        label: "Bandes",              href: "/bandes",           icon: "feather"           },
+  {                        label: "Animaux",             href: "/animaux",          icon: "paw"               },
+  {                        label: "Santé",               href: "/sante",            icon: "heart-rate-monitor"},
+  {                        label: "Reproduction",        href: "/reproduction",     icon: "dna"               },
+  { section: "GÉRER",      label: "Stocks",              href: "/stocks",           icon: "package"           },
+  {                        label: "Rapports",            href: "/rapports",         icon: "report-analytics"  },
+  { section: "CONFIGURER", label: "Ajouter une ferme",   href: "/fermes/nouveau",   icon: "building-plus"     },
+  {                        label: "Ajouter un bâtiment", href: "/batiments/nouveau",icon: "home-plus"         },
+  {                        label: "Paramètres",          href: "/parametres",       icon: "settings"          },
 ]
-
 // Couleurs selon statut — centralisées ici
 export const STATUT_STYLES: Record<string, { label: string; className: string }> = {
   ACTIVE:        { label: "Active",        className: "bg-green-400/10  text-green-300"  },

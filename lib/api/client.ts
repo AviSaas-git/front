@@ -27,10 +27,7 @@ apiClient.interceptors.request.use((config) => {
 
     const token = localStorage.getItem("avisaas_token")
 
-    console.log(
-      "Token envoyé : 123",
-      token ? token.substring(0, 20) + "..." : "AUCUN"
-    )
+    //console.log("Token envoyé : 123",token ? token.substring(0, 20) + "..." : "AUCUN")
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`

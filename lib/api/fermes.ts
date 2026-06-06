@@ -20,4 +20,10 @@ export async function creerFerme(data: FermeFormData): Promise<Ferme> {
 export async function listerFermes(): Promise<Ferme[]> {
   const res = await apiClient.get<Ferme[]>("/api/v1/fermes")
   return res.data
+} 
+
+
+export async function fetchFermes(): Promise<Ferme[]> {
+  const res = await apiClient.get<Ferme[]>("/api/v1/fermes")
+  return res.data
 }

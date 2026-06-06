@@ -28,14 +28,15 @@ export async function register(
   data: RegisterFormData
 ): Promise<AuthResponse> {
 
-  
+
+
   const res = await apiClient.post<AuthResponse>(
     "/api/v1/auth/register",
     data
   )
   // Sauvegarde automatique du token
   saveSession(res.data)
-   console.log("REGISTER RESPONSE", res.data)
+   //console.log("REGISTER RESPONSE", res.data)
   return res.data
 }
 

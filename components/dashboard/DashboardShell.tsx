@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect }     from "react"
+import { useEffect, useState }     from "react"
 import { useQuery }      from "@tanstack/react-query"
 import { Sidebar }       from "./Sidebar"
 import { Topbar }        from "./Topbar"
@@ -13,20 +13,29 @@ import { fetchDashboard } from "@/lib/api/dashboard"
 export function DashboardShell() {
   const hydrate = useAuthStore((s) => s.hydrate)
   const user    = useAuthStore((s) => s.user)
+  const token   = useAuthStore((s) => s.token)
 
-  useEffect(() => { hydrate() }, [hydrate])
 
-  const { data, isLoading } = useQuery({
-    queryKey:  ["dashboard"],
-    queryFn:   fetchDashboard,
-    staleTime: 30_000, // cache 30 secondes
+    // ← indique que le client est prêt
+  const [ready, setReady] = useState(false)
+
+   useEffect(() => {
+    hydrate()           // recharge user + token depuis localStorage
+    setReady(true)      // débloque les requêtes
+  }, [hydrate])
+
+   const { data, isLoading } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn:  fetchDashboard,
+    enabled:  ready && !!token,   // ← ne part QUE quand le token est là
+    staleTime: 30_000,
   })
 
+
+
   const today = new Date().toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day:     "numeric",
-    month:   "long",
-    year:    "numeric",
+    weekday: "long", day: "numeric",
+    month: "long",  year: "numeric",
   })
 
   return (
@@ -58,7 +67,7 @@ export function DashboardShell() {
             />
           )}
 
-          <ElevageTable />
+          <ElevageTable ready />
         </main>
       </div>
     </div>

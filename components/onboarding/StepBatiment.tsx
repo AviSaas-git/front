@@ -111,11 +111,10 @@ export function StepBatiment({
 
     try {
       
-      await creerBatiment(
+      await creerBatiment({
+        ...form,
         fermeId,
-        user.tenantId,
-        form
-      )
+      })
 
       router.push("/dashboard")
     } catch (error) {
