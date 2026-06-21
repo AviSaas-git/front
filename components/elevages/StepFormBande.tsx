@@ -40,7 +40,7 @@ export function StepFormBande({ espece, onBack }: Props) {
   })
 
 
-console.log("BATIMENTS =", batiments)
+//console.log("BATIMENTS =", batiments)
 
   function handleChange(field: keyof BandeFormData, value: string) {
     const parsed = field === "effectifInitial" ? Number(value) : value
@@ -83,7 +83,10 @@ console.log("BATIMENTS =", batiments)
       router.push("/dashboard")
     } catch (err: any) {
       const msg = err.response?.data?.message ?? "Erreur serveur."
+      alert("le batiment est peut-etre deja occuper: verifier")
+
       setErrors({ batimentId: msg })
+      
     } finally {
       setLoading(false)
     }

@@ -72,8 +72,12 @@ export async function createBande(data: {
   dateArrivee:    string
   fournisseur?:   string
 }): Promise<BandeData> {
-  const res = await apiClient.post<BandeData>("/api/v1/bandes", data)
-  return res.data
+ 
+      const res = await apiClient.post<BandeData>("/api/v1/bandes", data)
+     
+      return res.data
+  
+
 }
 
 export async function fetchBandeDetail(id: string): Promise<BandeData> {

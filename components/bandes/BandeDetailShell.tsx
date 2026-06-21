@@ -11,10 +11,16 @@ import { MortaliteHistory }  from "./MortaliteHistory"
 import { ProphylaxieForm }   from "./ProphylaxieForm"
 import { ProphylaxieHistory } from "./ProphylaxieHistory"
 
+import { fetchPesees, fetchCourbeCroissance } from "@/lib/api/pesees"
+import { PeseeForm }              from "./PeseeForm"
+import { PeseeHistory }           from "./PeseeHistory"
+import { CourbeCroissanceChart }  from "./CourbeCroissanceChart"
+
 type Props = { bandeId: string }
-type Tab = "mortalite" | "prophylaxie"
+type Tab = "mortalite" | "prophylaxie" | "pesee"
 
 export function BandeDetailShell({ bandeId }: Props) {
+
   const router = useRouter()
   const qc     = useQueryClient()
   const [ready, setReady] = useState(false)
@@ -41,13 +47,25 @@ export function BandeDetailShell({ bandeId }: Props) {
     queryFn:  () => fetchProphylaxies(bandeId),
     enabled:  ready,
   })
+  const { data: pesees = [] } = useQuery({
+    queryKey: ["pesees", bandeId],
+    queryFn:  () => fetchPesees(bandeId),
+    enabled:  ready,
+  })
 
+  const { data: courbe = [] } = useQuery({
+  queryKey: ["courbe", bandeId],
+  queryFn:  () => fetchCourbeCroissance(bandeId),
+  enabled:  ready,
+})
   function invalidateAll() {
     qc.invalidateQueries({ queryKey: ["bande", bandeId] })
     qc.invalidateQueries({ queryKey: ["mortalites", bandeId] })
     qc.invalidateQueries({ queryKey: ["prophylaxies", bandeId] })
     qc.invalidateQueries({ queryKey: ["bandes"] })
     qc.invalidateQueries({ queryKey: ["dashboard"] })
+    qc.invalidateQueries({ queryKey: ["pesees", bandeId] })
+    qc.invalidateQueries({ queryKey: ["courbe", bandeId] })
   }
 
   if (!ready || isLoading || !bande) {
@@ -117,20 +135,54 @@ export function BandeDetailShell({ bandeId }: Props) {
                             : "text-white/40 border-transparent hover:text-white/60"}`}>
               Prophylaxie · {prophylaxies.length}
             </button>
+
+            <button onClick={() => setTab("pesee")}
+              className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors
+                          ${tab === "pesee"
+                            ? "text-green-400 border-green-400"
+                            : "text-white/40 border-transparent hover:text-white/60"}`}>
+              Pesée
+            </button>
           </div>
 
-          {tab === "mortalite" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <MortaliteForm bandeId={bandeId} effectifActuel={bande.effectifActuel}
-                onSuccess={invalidateAll} />
-              <MortaliteHistory mortalites={mortalites} />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <ProphylaxieForm bandeId={bandeId} onSuccess={invalidateAll} />
-              <ProphylaxieHistory entries={prophylaxies} />
-            </div>
-          )}
+     {tab === "mortalite" && (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <MortaliteForm
+      bandeId={bandeId}
+      effectifActuel={bande.effectifActuel}
+      onSuccess={invalidateAll}
+    />
+    <MortaliteHistory mortalites={mortalites} />
+  </div>
+)}
+
+{tab === "prophylaxie" && (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <ProphylaxieForm
+      bandeId={bandeId}
+      onSuccess={invalidateAll}
+    />
+    <ProphylaxieHistory entries={prophylaxies} />
+  </div>
+)}
+
+{tab === "pesee" && (
+  <div className="flex flex-col gap-4">
+    <CourbeCroissanceChart
+      data={courbe}
+      especeNom={bande.especeNom}
+    />
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <PeseeForm
+        bandeId={bandeId}
+        onSuccess={invalidateAll}
+      />
+      <PeseeHistory pesees={pesees} />
+    </div>
+  </div>
+)}
+
 
         </main>
       </div>

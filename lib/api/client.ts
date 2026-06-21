@@ -55,6 +55,29 @@ apiClient.interceptors.response.use(
       }
     }
 
+     // ==============================
+    // 🔥 EXTRACTION UNIFIÉE MESSAGE
+    // ==============================
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "Erreur inconnue"
+
+    const status = error.response?.status
+
+    // 🔥 Erreurs métier (400, 409, 422)
+    if (status === 400 || status === 409 || status === 422) {
+      return Promise.reject(new Error(message))
+    }
+
+    // Erreur serveur
+    if (status >= 500) {
+      return Promise.reject(
+        new Error("Erreur serveur. Réessayez plus tard.")
+      )
+    }
+
     // Erreur métier
     if (error.response?.status === 422) {
       return Promise.reject(
