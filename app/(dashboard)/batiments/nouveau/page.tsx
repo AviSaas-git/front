@@ -7,6 +7,7 @@ import { FormField }        from "@/components/ui/FormField"
 import { creerBatiment } from "@/lib/api/batiments"
 import { apiClient }        from "@/lib/api/client"
 
+
 async function fetchFermes() {
   const res = await apiClient.get("/api/v1/fermes")
   return res.data as { id: string; nom: string }[]

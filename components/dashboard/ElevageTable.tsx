@@ -6,11 +6,14 @@ import { ProgressCell }  from "./ProgressCell"
 import { fetchBandes }   from "@/lib/api/bandes"
 import { useAuthStore }  from "@/lib/store/auth"
 import { STATUT_STYLES, MODE_STYLES } from "@/lib/constants/dashboard"
-
+import { useRouter } from "next/navigation"
+ 
 type Props = { ready: boolean }
 
 export function ElevageTable({ ready }: Props) {
   const token = useAuthStore((s) => s.token)
+  const router = useRouter()
+
 
   const { data: bandes = [], isLoading } = useQuery({
     queryKey: ["bandes"],
@@ -80,7 +83,7 @@ export function ElevageTable({ ready }: Props) {
               return (
                 <tr
                   key={bande.id}
-                  onClick={() => setSelected(bande.id)}
+                  onClick={() => router.push(`/bandes/${bande.id}`)}
                   className={`border-b border-white/[0.04] last:border-0
                               cursor-pointer transition-colors
                               ${isSelected

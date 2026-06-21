@@ -24,6 +24,12 @@ export type AuthResponse = {
 
 // ── FONCTIONS ────────────────────────────────────────────────────────────
 
+
+export async function fetchFermes(): Promise<(<Promise>() => { id: string; nom: string; localisation: string; capaciteMax: number }[])>
+ {
+  const res = await apiClient.get("/api/v1/fermes")
+  return res.data
+}
 export async function register(
   data: RegisterFormData
 ): Promise<AuthResponse> {

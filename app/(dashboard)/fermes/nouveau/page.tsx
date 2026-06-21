@@ -4,7 +4,8 @@ import { useState }      from "react"
 import { useRouter }     from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { FormField }     from "@/components/ui/FormField"
-import { createFerme }   from "@/lib/api/auth"
+import { creerFerme }   from "@/lib/api/fermes"
+
 
 export default function NouvelleFermePage() {
   const router = useRouter()
@@ -35,9 +36,9 @@ export default function NouvelleFermePage() {
     if (!validate()) return
     setLoading(true)
     try {
-      await createFerme({
+      await creerFerme({
         nom:         form.nom,
-        localisation: form.localisation || undefined,
+        localisation: form.localisation,
         capaciteMax: Number(form.capaciteMax),
         surfaceM2:   form.surfaceM2 ? Number(form.surfaceM2) : undefined,
       })
