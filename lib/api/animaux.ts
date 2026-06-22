@@ -4,7 +4,7 @@ export type AnimalData = {
   id:            string
   numero:        string
   nom:           string
-  sexe:          "MALE" | "FEMELLE"
+  sexe:          "MALE" | "FEMELLE" | "INDETERMINE"
   dateNaissance: string
   ageEnMois:     number
   origine:       string
@@ -52,5 +52,14 @@ export async function createAnimal(data: {
   mereId?:        string
 }): Promise<AnimalData> {
   const res = await apiClient.post<AnimalData>("/api/v1/animaux", data)
+  return res.data
+}
+export async function fetchAnimalById(id: string): Promise<AnimalData> {
+  const res = await apiClient.get<AnimalData>(`/api/v1/animaux/${id}`)
+  return res.data
+}
+
+export async function updateSexe(id: string, sexe: "MALE" | "FEMELLE" |"INDETERMINE"): Promise<AnimalData> {
+  const res = await apiClient.patch(`/api/v1/animaux/${id}/sexe`, { sexe })
   return res.data
 }

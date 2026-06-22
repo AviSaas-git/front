@@ -25,6 +25,7 @@ export type BandeData = {
   tauxMortalite: number
   ageEnJours:    number
   progressionPct: number
+  especeId: string 
 }
 
 export type MortaliteEntry = {

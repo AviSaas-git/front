@@ -83,13 +83,13 @@ export function StepFormBande({ espece, onBack }: Props) {
       router.push("/dashboard")
     } catch (err: any) {
       const msg = err.response?.data?.message ?? "Erreur serveur."
-      alert("le batiment est peut-etre deja occuper: verifier")
+      alert("le batiment est peut-etre deja occuper: verifier ")
 
       setErrors({ batimentId: msg })
       
     } finally {
       setLoading(false)
-    }
+    } 
   }
 
   const batimentOptions = [

@@ -96,6 +96,11 @@ export function BandeDetailShell({ bandeId }: Props) {
                        self-start flex items-center gap-1">
             ← Retour au tableau de bord
           </button>
+          <a href={`/especes/${bande.especeId}/courbe`}
+            className="text-xs text-blue-400 hover:text-blue-300
+                      transition-colors self-start flex items-center gap-1">
+            ⚙ Configurer la courbe de référence {bande.especeNom} →
+          </a>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="bg-white/[0.03] border border-white/[0.07] rounded-xl p-4">
