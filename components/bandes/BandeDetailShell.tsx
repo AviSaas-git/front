@@ -211,7 +211,8 @@ export function BandeDetailShell({ bandeId }: Props) {
                 effectifActuel={bande.effectifActuel}
                 onSuccess={invalidateAll}
               />
-              <MortaliteHistory mortalites={mortalites} />
+              <MortaliteHistory mortalites={mortalites} bandeId={bandeId} 
+                   effectifInitial={bande.effectifInitial} />
             </div>
           )}
 
