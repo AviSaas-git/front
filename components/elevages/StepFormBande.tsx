@@ -51,7 +51,7 @@ export function StepFormBande({ espece, onBack }: Props) {
   }
 
   function validate(): boolean {
-    const next: Partial<BandeFormData> = {}
+    const next: Partial<Record<keyof BandeFormData, string>> = {}
     if (!form.batimentId)           next.batimentId = "Sélectionnez un bâtiment"
     if (!form.effectifInitial || form.effectifInitial <= 0) 
       next.effectifInitial = "Effectif invalide"
