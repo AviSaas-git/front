@@ -5,7 +5,7 @@ import { FormField }   from "@/components/ui/FormField"
 import { ProgressBar } from "./ProgressBar"
 import type { FermeFormData } from "@/lib/types/forms"
 import { creerFerme } from "@/lib/api/fermes"
-
+import { toastSuccess, toastError, traduireErreur } from "@/lib/toast"
 type Props = {
   onDone: (fermeId: string, nom: string) => void
 }
@@ -57,9 +57,10 @@ export function StepFerme({ onDone }: Props) {
     setLoading(true)
     try {
       const ferme = await creerFerme(form)
+      toastSuccess(`Ferme "${ferme.nom}" créée avec succès.`)
       onDone(ferme.id, ferme.nom)
-    } catch {
-      setErrors({ nom: "Erreur serveur. Réessayez." })
+    } catch (err: any) {
+      toastError(traduireErreur(err))
     } finally {
       setLoading(false)
     }

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { confirmerGestation, declarerEchec } from "@/lib/api/reproduction"
 import type { ReproductionEntry } from "@/lib/api/reproduction"
 import { PorteeForm } from "./PorteeForm"
+import { toastError, toastSuccess, toastWarning, traduireErreur } from "@/lib/toast"
 
 type Props = { repro: ReproductionEntry; onUpdated: () => void }
 
@@ -25,15 +26,26 @@ export function SaillieCard({ repro, onUpdated }: Props) {
 
   async function handleConfirmer() {
     setLoading(true); setError("")
-    try { await confirmerGestation(repro.id); onUpdated() }
-    catch (err: any) { setError(err.response?.data?.message ?? "Erreur serveur.") }
+    try { await confirmerGestation(repro.id);
+       toastSuccess(`${repro.femelleNumero} confirmée gestante — mise bas prévue le ${
+    new Date(repro.dateMiseBasPrevue).toLocaleDateString("fr-FR")}`)
+       onUpdated() 
+      
+      }
+
+    catch (err: any) {
+        toastError(traduireErreur(err))}
     finally { setLoading(false) }
   }
 
   async function handleEchec() {
     setLoading(true); setError("")
-    try { await declarerEchec(repro.id); onUpdated() }
-    catch (err: any) { setError(err.response?.data?.message ?? "Erreur serveur.") }
+    try { await declarerEchec(repro.id); 
+      onUpdated() 
+    toastWarning(`Échec déclaré pour ${repro.femelleNumero}.`)
+    }
+    catch (err: any) {
+        toastError(traduireErreur(err))}
     finally { setLoading(false) }
   }
 

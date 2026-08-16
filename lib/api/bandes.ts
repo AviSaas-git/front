@@ -114,3 +114,40 @@ export async function createProphylaxie(bandeId: string, data: {
   const res = await apiClient.post(`/api/v1/bandes/${bandeId}/prophylaxie`, data)
   return res.data
 }
+
+// 
+export type ConsommationEntry = {
+  id: string; date: string; typeAliment: string
+  quantiteKg: number; prixParKgFcfa: number
+  montantFcfa: number; observations: string | null
+}
+
+export async function fetchConsommationBande(bandeId: string): Promise<ConsommationEntry[]> {
+  const res = await apiClient.get<ConsommationEntry[]>(
+    `/api/v1/bandes/${bandeId}/consommation-aliment`)
+  return res.data
+}
+
+export async function createConsommationBande(bandeId: string, data: {
+  date: string; typeAliment: string; quantiteKg: number
+  prixParKgFcfa: number; observations?: string
+}): Promise<ConsommationEntry> {
+  const res = await apiClient.post(
+    `/api/v1/bandes/${bandeId}/consommation-aliment`, data)
+  return res.data
+}
+
+export async function updateBande(id: string, data: Partial<{
+  race: string; fournisseur: string; batimentId: string; statut: string
+}>): Promise<BandeData> {
+  const res = await apiClient.patch<BandeData>(`/api/v1/bandes/${id}`, data)
+  return res.data
+}
+
+export async function deleteBande(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/bandes/${id}`)
+}
+
+export async function deleteMortalite(bandeId: string, mortaliteId: string): Promise<void> {
+  await apiClient.delete(`/api/v1/bandes/${bandeId}/mortalites/${mortaliteId}`)
+}

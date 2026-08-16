@@ -7,6 +7,8 @@ import { Sidebar } from "@/components/dashboard/Sidebar"
 import { Topbar }  from "@/components/dashboard/Topbar"
 import { fetchAnimaux } from "@/lib/api/animaux"
 
+
+
 const SEXE_LABELS: Record<string, string> = {
   MALE: "Mâle", FEMELLE: "Femelle", INDETERMINE: "INDETERMINE"
 }

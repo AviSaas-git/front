@@ -91,3 +91,23 @@ function saveSession(data: AuthResponse) {
 
   localStorage.setItem("avisaas_user", JSON.stringify(user))
 }
+export async function updateFerme(id: string, data: Partial<{
+  nom: string; localisation: string; surfaceM2: number; capaciteMax: number
+}>): Promise<{ id: string; nom: string }> {
+  const res = await apiClient.patch(`/api/v1/fermes/${id}`, data)
+  return res.data
+}
+
+export async function deleteFerme(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/fermes/${id}`)
+}
+
+export async function updateBatiment(id: string, data: Partial<{
+  nom: string; capacite: number; surfaceM2: number; type: string; typeChauffage: string
+}>): Promise<void> {
+  await apiClient.patch(`/api/v1/batiments/${id}`, data)
+}
+
+export async function deleteBatiment(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/batiments/${id}`)
+}

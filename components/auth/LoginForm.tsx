@@ -7,7 +7,7 @@ import { FormField } from "@/components/ui/FormField"
 import type { LoginFormData } from "@/lib/types/forms"
 import { login } from "@/lib/api/auth"
 import { useAuthStore } from "@/lib/store/auth"
-
+import { toastSuccess, toastError, traduireErreur } from "@/lib/toast"
 const INITIAL: LoginFormData = { email: "", password: "" }
 
 export function LoginForm() {
@@ -30,17 +30,27 @@ export function LoginForm() {
     return Object.keys(next).length === 0
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!validate()) return
 
     setLoading(true)
     try {
-     const response = await login(form)
-      useAuthStore.getState().setAuth(response.user, response.token)
-     router.push("/dashboard")
-    }catch {
-      setErrors({ password: "Email ou mot de passe incorrect" })
+      const response = await login(form)
+      
+      // 🟢 1. On extrait les champs plats renvoyés par ton AuthResponse Java
+      const { token, userId, nom, email, role, tenantId, plan } = response
+
+      // 🟢 2. On regroupe les infos dans un objet utilisateur structuré pour Zustand
+      const userSession = { id: userId, nom, email, role, tenantId, plan }
+
+      // 🟢 3. On alimente le Store avec le nouvel objet et le token
+      useAuthStore.getState().setAuth(userSession, token)
+
+      toastSuccess("Connexion réussie. Bienvenue !")
+      router.push("/dashboard")
+    } catch (err: any) {
+      toastError(traduireErreur(err))
     } finally {
       setLoading(false)
     }

@@ -24,10 +24,7 @@ apiClient.interceptors.request.use((config) => {
 
   // ✅ Ne pas envoyer le token sur login/register
   if (!isAuthRoute && typeof window !== "undefined") {
-
     const token = localStorage.getItem("avisaas_token")
-
-    //console.log("Token envoyé : 123",token ? token.substring(0, 20) + "..." : "AUCUN")
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -44,18 +41,37 @@ apiClient.interceptors.response.use(
   (response) => response,
 
   (error) => {
-    if (typeof window !== "undefined") {
+    const status = error.response?.status
 
-      // JWT expiré
-      if (error.response?.status === 401) {
+    if (typeof window !== "undefined") {
+      // 🟢 AJUSTEMENT : On intercepte les 401 ET les 403 pour la session
+      if (status === 401 || status === 403) {
         localStorage.removeItem("avisaas_token")
         localStorage.removeItem("avisaas_user")
 
-        window.location.href = "/login"
+        // 🟢 On n'affiche le toast QUE si la session est vraiment expirée/interdite
+        import("react-hot-toast").then(({ default: toast }) => {
+          toast.error("Session expirée ou accès refusé. Reconnectez-vous.", {
+            duration: 4000,
+            style: {
+              background: "#1c0a0a",
+              color: "#fca5a5",
+              border: "1px solid rgba(248,113,113,0.2)",
+              borderRadius: "12px",
+              fontSize: "13px",
+            },
+          })
+        })
+
+        // Redirection vers le login si on n'y est pas déjà
+        if (!window.location.pathname.includes("/login")) {
+          window.location.href = "/login"
+        }
+        return Promise.reject(error)
       }
     }
 
-     // ==============================
+    // ==============================
     // 🔥 EXTRACTION UNIFIÉE MESSAGE
     // ==============================
     const message =
@@ -64,36 +80,15 @@ apiClient.interceptors.response.use(
       error.message ||
       "Erreur inconnue"
 
-    const status = error.response?.status
-
     // 🔥 Erreurs métier (400, 409, 422)
     if (status === 400 || status === 409 || status === 422) {
       return Promise.reject(new Error(message))
     }
 
-    // Erreur serveur
+    // Erreur serveur (500+)
     if (status >= 500) {
       return Promise.reject(
-        new Error("Erreur serveur. Réessayez plus tard.")
-      )
-    }
-
-    // Erreur métier
-    if (error.response?.status === 422) {
-      return Promise.reject(
-        new Error(
-          error.response.data?.message ??
-          "Règle métier non respectée"
-        )
-      )
-    }
-
-    // Erreur serveur
-    if (error.response?.status >= 500) {
-      return Promise.reject(
-        new Error(
-          "Erreur serveur. Réessayez dans quelques instants."
-        )
+        new Error("Erreur serveur. Réessayez dans quelques instants.")
       )
     }
 

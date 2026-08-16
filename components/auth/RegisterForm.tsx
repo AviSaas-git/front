@@ -7,7 +7,7 @@ import { FormField } from "@/components/ui/FormField"
 import type { RegisterFormData } from "@/lib/types/forms"
 import { register } from "@/lib/api/auth"
 import { useAuthStore } from "@/lib/store/auth"
-
+import { toastSuccess, toastError, traduireErreur } from "@/lib/toast"
 // Valeurs initiales
 const INITIAL: RegisterFormData = {
   nom:       "",
@@ -83,9 +83,10 @@ export function RegisterForm() {
       "TOKEN DANS STORAGE",
       localStorage.getItem("avisaas_token")
     )
+    toastSuccess("Compte créé avec succès. Configurons votre ferme.")
      router.push("/setup")
-    }catch {
-      setErrors({ email: "Une erreur est survenue. Réessayez." })
+    }catch (err: any) {
+      toastError(traduireErreur(err))
     } finally {
     }
       setLoading(false)

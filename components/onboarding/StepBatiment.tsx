@@ -7,7 +7,7 @@ import { ProgressBar } from "./ProgressBar"
 import type { BatimentFormData } from "@/lib/types/forms"
 import { creerBatiment } from "@/lib/api/batiments"
 import { useAuthStore } from "@/lib/store/auth"
-
+import { toastSuccess, toastError, traduireErreur } from "@/lib/toast"
 type Props = {
   fermeId: string
   fermeName: string
@@ -115,10 +115,10 @@ export function StepBatiment({
         ...form,
         fermeId,
       })
-
+      toastSuccess("Bâtiment ajouté. Configuration terminée !")
       router.push("/dashboard")
-    } catch (error) {
-      console.error(error)
+    }  catch (err: any) {
+       toastError(traduireErreur(err))
 
       setErrors({
         nom: "Erreur serveur. Réessayez.",

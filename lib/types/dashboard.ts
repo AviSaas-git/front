@@ -32,7 +32,12 @@ export type AlertItem = {
 
 export type NavItem = {
   label: string
-  href:  string
-  icon:  string
+  href: string
+  icon: any
+
+  badge?: number | string
+
+  children?: NavItem[]
+
   section?: string
 }

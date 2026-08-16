@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { FormField } from "@/components/ui/FormField"
 import { createMortalite } from "@/lib/api/bandes"
+import { toastSuccess, toastError, traduireErreur } from "@/lib/toast"
 
 type Props = { bandeId: string; effectifActuel: number; onSuccess: () => void }
 const today = new Date().toISOString().split("T")[0]
@@ -25,12 +26,13 @@ export function MortaliteForm({ bandeId, effectifActuel, onSuccess }: Props) {
       await createMortalite(bandeId, {
         date: form.date, nombreMorts: n, cause: form.cause || undefined,
       })
+       toastSuccess(`${n} mort${n > 1 ? "s" : ""} enregistré${n > 1 ? "s" : ""}. Effectif mis à jour.`)
       setForm({ date: today, nombreMorts: "", cause: "" })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 2000)
       onSuccess()
     } catch (err: any) {
-      setError(err.response?.data?.message ?? "Erreur serveur.")
+      toastError(traduireErreur(err))
     } finally {
       setLoading(false)
     }

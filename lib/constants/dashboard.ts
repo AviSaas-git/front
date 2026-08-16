@@ -1,4 +1,37 @@
-import type { KpiItem, ElevageRow, AlertItem, NavItem } from "@/lib/types/dashboard"
+import type { KpiItem, ElevageRow, AlertItem, } from "@/lib/types/dashboard"
+import { 
+  IconLayoutDashboard, 
+  IconFeather, 
+  IconPaw, 
+  IconHeartRateMonitor, 
+  IconDna, 
+  IconPackage, 
+  IconReportAnalytics, 
+  IconWheat, 
+  IconBuildingPlus, 
+  IconHomePlus, 
+  IconSettings, 
+  IconProps
+} from '@tabler/icons-react'
+
+import { ForwardRefExoticComponent, RefAttributes } from "react";
+
+export interface NavChild {
+  label: string;
+  href: string;
+  icon: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+  badge?: string | number; // Optionnel
+}
+
+export interface NavItem {
+  label: string;
+  href: string; // Optionnel si l'élément a des enfants
+  icon: any;
+  section?: string; // Optionnel
+  badge?: string | number; // Optionnel
+  children?: NavChild[]; // Optionnel
+}
+
 
 export const KPIS: KpiItem[] = [
   {
@@ -74,16 +107,17 @@ export const ALERTS: AlertItem[] = [
 ]
 
 export const NAV_ITEMS: NavItem[] = [
-  { section: "PRINCIPAL",  label: "Tableau de bord",    href: "/dashboard",        icon: "layout-dashboard"  },
-  {                        label: "Bandes",              href: "/bandes",           icon: "feather"           },
-  {                        label: "Animaux",             href: "/animaux",          icon: "paw"               },
-  {                        label: "Santé",               href: "/sante",            icon: "heart-rate-monitor"},
-  {                        label: "Reproduction",        href: "/reproduction",     icon: "dna"               },
-  { section: "GÉRER",      label: "Stocks",              href: "/stocks",           icon: "package"           },
-  {                        label: "Rapports",            href: "/rapports",         icon: "report-analytics"  },
-  { section: "CONFIGURER", label: "Ajouter une ferme",   href: "/fermes/nouveau",   icon: "building-plus"     },
-  {                        label: "Ajouter un bâtiment", href: "/batiments/nouveau",icon: "home-plus"         },
-  {                        label: "Paramètres",          href: "/parametres",       icon: "settings"          },
+  { section: "PRINCIPAL",  label: "Tableau de bord",   href: "/dashboard",        icon: IconLayoutDashboard },
+  {                        label: "Bandes",            href: "/bandes",           icon: IconFeather },
+  {                        label: "Animaux",           href: "/animaux",          icon: IconPaw },
+  {                        label: "Santé",             href: "/sante",            icon: IconHeartRateMonitor },
+  {                        label: "Reproduction",      href: "/reproduction",     icon: IconDna },
+  { section: "GÉRER",      label: "Stocks",            href: "/stock",           icon: IconPackage },
+  {                        label: "Rapports",          href: "/apports",         icon: IconReportAnalytics },
+  { section: "GESTION",    label: "Alimentation",      href: "/alimentation",     icon: IconWheat },
+  { section: "CONFIGURER", label: "Ajouter une ferme",   href: "/fermes/nouveau",   icon: IconBuildingPlus },
+  {                        label: "Ajouter un bâtiment", href: "/batiments/nouveau",icon: IconHomePlus },
+  {                        label: "Paramètres",          href: "/parametres",       icon: IconSettings },
 ]
 // Couleurs selon statut — centralisées ici
 export const STATUT_STYLES: Record<string, { label: string; className: string }> = {

@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { FormField } from "@/components/ui/FormField"
 import { createProphylaxie } from "@/lib/api/bandes"
+import { toastSuccess, toastError, traduireErreur } from "@/lib/toast"
+
 
 type Props = { bandeId: string; onSuccess: () => void }
 const today = new Date().toISOString().split("T")[0]
@@ -45,13 +47,15 @@ export function ProphylaxieForm({ bandeId, onSuccess }: Props) {
         voieAdministration: form.voieAdministration || undefined,
         observations: form.observations || undefined,
       })
+
+      toastSuccess(`Traitement "${form.traitement}" ajouté au carnet sanitaire.`)
       setForm({ dateApplication: today, traitement: "", laboratoire: "",
                 dosage: "", voieAdministration: "", observations: "" })
       setSuccess(true)
       setTimeout(() => setSuccess(false), 2000)
       onSuccess()
     } catch (err: any) {
-      setError(err.response?.data?.message ?? "Erreur serveur.")
+          toastError(traduireErreur(err))
     } finally {
       setLoading(false)
     }

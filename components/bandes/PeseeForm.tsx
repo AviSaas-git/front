@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { FormField } from "@/components/ui/FormField"
 import { createPesee } from "@/lib/api/pesees"
+import { toastSuccess, toastError, traduireErreur } from "@/lib/toast"
 
 type Props = { bandeId: string; onSuccess: () => void }
 const today = new Date().toISOString().split("T")[0]
@@ -29,13 +30,21 @@ export function PeseeForm({ bandeId, onSuccess }: Props) {
       const res = await createPesee(bandeId, {
         date: form.date, nombreSujetsPeses: n, poidsTotalKg: kg,
       })
+
       setForm({ date: today, nombreSujetsPeses: "", poidsTotalKg: "" })
+
       setSuccess(true)
+            const ecartMsg = res.ecartPct !== null
+          ? ` · Écart ${res.ecartPct > 0 ? "+" : ""}${res.ecartPct.toFixed(1)}% vs cible`
+          : ""
+      toastSuccess(`Pesée enregistrée — ${Math.round(res.poidsMoyenGrammes)} g / sujet${ecartMsg}`)
       setDernierEcart(res.ecartPct)
       setTimeout(() => setSuccess(false), 3000)
+
+
       onSuccess()
     } catch (err: any) {
-      setError(err.response?.data?.message ?? "Erreur serveur.")
+       toastError(traduireErreur(err))
     } finally {
       setLoading(false)
     }

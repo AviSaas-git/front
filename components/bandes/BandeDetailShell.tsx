@@ -16,8 +16,21 @@ import { PeseeForm }              from "./PeseeForm"
 import { PeseeHistory }           from "./PeseeHistory"
 import { CourbeCroissanceChart }  from "./CourbeCroissanceChart"
 
+import { FinancesDashboard } from "./FinancesDashboard"
+
+
+import { createConsommationBande, fetchConsommationBande } from "@/lib/api/bandes"
+import { ConsommationForm } from "./ConsommationForm"
+
+
+import { AlimentationBandePanel } from "../alimentation/AlimentationBandePanel"
+
+import { PontePanel } from "./PontePanel"
+
+
 type Props = { bandeId: string }
-type Tab = "mortalite" | "prophylaxie" | "pesee"
+
+type Tab = "mortalite" | "prophylaxie" | "pesee" | "finances" | "alimentation" | "ponte"
 
 export function BandeDetailShell({ bandeId }: Props) {
 
@@ -26,10 +39,16 @@ export function BandeDetailShell({ bandeId }: Props) {
   const [ready, setReady] = useState(false)
   const [tab, setTab]     = useState<Tab>("mortalite")
 
+
+
   useEffect(() => {
     setReady(!!localStorage.getItem("avisaas_token"))
   }, [])
-
+  const { data: consommationsBande = [] } = useQuery({
+    queryKey: ["consommation-bande", bandeId],
+    queryFn:  () => fetchConsommationBande(bandeId),
+    enabled:  ready,
+  })
   const { data: bande, isLoading } = useQuery({
     queryKey: ["bande", bandeId],
     queryFn:  () => fetchBandeDetail(bandeId),
@@ -66,6 +85,7 @@ export function BandeDetailShell({ bandeId }: Props) {
     qc.invalidateQueries({ queryKey: ["dashboard"] })
     qc.invalidateQueries({ queryKey: ["pesees", bandeId] })
     qc.invalidateQueries({ queryKey: ["courbe", bandeId] })
+    qc.invalidateQueries({ queryKey: ["consommation-bande", bandeId] })
   }
 
   if (!ready || isLoading || !bande) {
@@ -80,6 +100,9 @@ export function BandeDetailShell({ bandeId }: Props) {
   }
 
   const tauxColor = bande.tauxMortalite > 3 ? "text-rose-400" : "text-green-400"
+
+  const estPondeuse = bande.especeNom.toLowerCase().includes("pondeuse")
+
 
   return (
     <div className="flex h-screen bg-[#09090b] text-white overflow-hidden">
@@ -148,45 +171,94 @@ export function BandeDetailShell({ bandeId }: Props) {
                             : "text-white/40 border-transparent hover:text-white/60"}`}>
               Pesée
             </button>
+            <button onClick={() => setTab("finances")}
+              className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors
+                          ${tab === "finances"
+                            ? "text-yellow-400 border-yellow-400"
+                            : "text-white/40 border-transparent hover:text-white/60"}`}>
+              Finances
+            </button>
+
+
+
+            <button onClick={() => setTab("alimentation")}
+              className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors
+                          ${tab === "alimentation"
+                            ? "text-orange-400 border-orange-400"
+                            : "text-white/40 border-transparent hover:text-white/60"}`}>
+              Alimentation
+            </button>
+
+          {estPondeuse && (
+            <button
+              onClick={() => setTab("ponte")}
+              className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors
+                ${
+                  tab === "ponte"
+                    ? "text-orange-400 border-orange-400"
+                    : "text-white/40 border-transparent hover:text-white/60"
+                }`}
+            >
+              Ponte
+            </button>
+          )}
           </div>
 
-     {tab === "mortalite" && (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <MortaliteForm
-      bandeId={bandeId}
-      effectifActuel={bande.effectifActuel}
-      onSuccess={invalidateAll}
-    />
-    <MortaliteHistory mortalites={mortalites} />
-  </div>
-)}
+          {tab === "mortalite" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <MortaliteForm
+                bandeId={bandeId}
+                effectifActuel={bande.effectifActuel}
+                onSuccess={invalidateAll}
+              />
+              <MortaliteHistory mortalites={mortalites} />
+            </div>
+          )}
 
-{tab === "prophylaxie" && (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-    <ProphylaxieForm
-      bandeId={bandeId}
-      onSuccess={invalidateAll}
-    />
-    <ProphylaxieHistory entries={prophylaxies} />
-  </div>
-)}
+          {tab === "prophylaxie" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <ProphylaxieForm
+                bandeId={bandeId}
+                onSuccess={invalidateAll}
+              />
+              <ProphylaxieHistory entries={prophylaxies} />
+            </div>
+          )}
+          {tab === "finances" && (
+            <FinancesDashboard
+              bandeId={bandeId}
+              effectifInitial={bande.effectifInitial}
+            />
+          )}
+          {tab === "alimentation" && (
+              <AlimentationBandePanel
+                bandeId={bandeId}
+                effectifInitial={bande.effectifInitial}
+              />
+            )}
 
-{tab === "pesee" && (
-  <div className="flex flex-col gap-4">
-    <CourbeCroissanceChart
-      data={courbe}
-      especeNom={bande.especeNom}
-    />
+     
+       
+          {tab === "ponte" && estPondeuse && (
+            <PontePanel bandeId={bandeId} />
+          )}
+         
+          {tab === "pesee" && (
+            <div className="flex flex-col gap-4">
+              <CourbeCroissanceChart
+                data={courbe}
+                especeNom={bande.especeNom}
+              />
 
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <PeseeForm
-        bandeId={bandeId}
-        onSuccess={invalidateAll}
-      />
-      <PeseeHistory pesees={pesees} />
-    </div>
-  </div>
-)}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <PeseeForm
+                  bandeId={bandeId}
+                  onSuccess={invalidateAll}
+                />
+                <PeseeHistory pesees={pesees} />
+              </div>
+            </div>
+          )}
 
 
         </main>

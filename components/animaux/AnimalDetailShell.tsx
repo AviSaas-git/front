@@ -7,13 +7,24 @@ import { Sidebar } from "@/components/dashboard/Sidebar"
 import { Topbar }  from "@/components/dashboard/Topbar"
 import { fetchAnimalById, updateSexe } from "@/lib/api/animaux"
 
+import { fetchEvenementsAnimal, fetchConsommationAnimal } from "@/lib/api/animaux"
+//import { createConsommationAnimal } from "@/lib/api/animaux"
+import { EvenementAnimalForm } from "./EvenementAnimalForm"
+import { EvenementHistory }    from "./EvenementHistory"
+import { ConsommationForm }    from "@/components/bandes/ConsommationForm"
+import { AlimentationAnimalPanel } from "./AlimentationAnimalPanel"
+
 type Props = { animalId: string }
+type Tab = "infos" | "evenements" | "consommation"
+
 
 export function AnimalDetailShell({ animalId }: Props) {
   const router = useRouter()
   const qc = useQueryClient()
   const [ready, setReady]     = useState(false)
   const [sexeLoading, setSexeLoading] = useState(false)
+  const [tab, setTab] = useState<Tab>("infos")
+
 
   useEffect(() => {
     setReady(!!localStorage.getItem("avisaas_token"))
@@ -24,6 +35,26 @@ export function AnimalDetailShell({ animalId }: Props) {
     queryFn:  () => fetchAnimalById(animalId),
     enabled:  ready,
   })
+
+  const { data: evenements = [] } = useQuery({
+    queryKey: ["evenements", animalId],
+    queryFn:  () => fetchEvenementsAnimal(animalId),
+    enabled: ready,
+  })
+
+
+  const { data: consommations = [] } = useQuery({
+  queryKey: ["consommation-animal", animalId],
+  queryFn:  () => fetchConsommationAnimal(animalId),
+  enabled: ready,
+  })
+
+  function invalidate() {
+    qc.invalidateQueries({ queryKey: ["animal", animalId] })
+    qc.invalidateQueries({ queryKey: ["evenements", animalId] })
+    qc.invalidateQueries({ queryKey: ["consommation-animal", animalId] })
+    qc.invalidateQueries({ queryKey: ["animaux"] })
+  }
 
   async function handleSexe(sexe: "MALE" | "FEMELLE" | "INDETERMINE") {
     setSexeLoading(true)
@@ -101,58 +132,135 @@ export function AnimalDetailShell({ animalId }: Props) {
             ))}
           </div>
 
-          {/* Infos principales */}
-          <div className="bg-white/[0.03] border border-white/8 rounded-xl p-5">
-            <h2 className="text-sm font-medium text-white mb-4">Informations</h2>
-            <div className="grid grid-cols-2 gap-y-3">
-              {[
-                ["Numéro",        animal.numero],
-                ["Nom",           animal.nom ?? "—"],
-                ["Espèce",        `${animal.especeIcon} ${animal.especeNom}`],
-                ["Bâtiment",      animal.batimentNom],
-                ["Naissance",     new Date(animal.dateNaissance).toLocaleDateString("fr-FR")],
-                ["Origine",       animal.origine === "ACHAT" ? "Achat externe" : "Naissance en ferme"],
-              ].map(([l, v]) => (
-                <div key={l}>
-                  <p className="text-[10px] text-white/30 mb-0.5">{l}</p>
-                  <p className="text-xs text-white/80">{v}</p>
-                </div>
-              ))}
-            </div>
+
+          <div className="flex gap-1 border-b border-white/[0.07]">
+            {([
+              { id: "infos",        label: "Informations" },
+              { id: "evenements",   label: `Événements · ${evenements.length}` },
+              { id: "consommation", label: "Alimentation" },
+            ] as { id: Tab; label: string }[]).map((t) => (
+              <button key={t.id} onClick={() => setTab(t.id)}
+                className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors
+                            ${tab === t.id
+                              ? "text-green-400 border-green-400"
+                              : "text-white/40 border-transparent hover:text-white/60"}`}>
+                {t.label}
+              </button>
+            ))}
+            
           </div>
 
-          {/* Généalogie */}
-          {(animal.pereNumero || animal.mereNumero || animal.consanguin) && (
-            <div className="bg-white/[0.03] border border-white/8 rounded-xl p-5">
-              <h2 className="text-sm font-medium text-white mb-4">Généalogie</h2>
+          {/* Infos principales */}
+          {tab === "infos" && (
+  <>
+    <div className="bg-white/[0.03] border border-white/8 rounded-xl p-5">
+      <h2 className="text-sm font-medium text-white mb-4">
+        Informations
+      </h2>
 
-              {animal.consanguin && (
-                <div className="bg-amber-400/[0.08] border border-amber-400/20
-                                rounded-lg px-3 py-2 text-xs text-amber-300 mb-3">
-                  ⚠ Risque de consanguinité détecté
-                </div>
-              )}
+      <div className="grid grid-cols-2 gap-y-3">
+        {[
+          ["Numéro", animal.numero],
+          ["Nom", animal.nom ?? "—"],
+          ["Espèce", `${animal.especeIcon} ${animal.especeNom}`],
+          ["Bâtiment", animal.batimentNom],
+          [
+            "Naissance",
+            new Date(animal.dateNaissance).toLocaleDateString("fr-FR"),
+          ],
+          [
+            "Origine",
+            animal.origine === "ACHAT"
+              ? "Achat externe"
+              : "Naissance en ferme",
+          ],
+        ].map(([l, v]) => (
+          <div key={l}>
+            <p className="text-[10px] text-white/30 mb-0.5">{l}</p>
+            <p className="text-xs text-white/80">{v}</p>
+          </div>
+        ))}
+      </div>
+    </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-[10px] text-white/30 mb-1">Père</p>
-                  {animal.pereNumero ? (
-                    <p className="text-xs font-mono text-white/70">{animal.pereNumero}</p>
-                  ) : (
-                    <p className="text-xs text-white/30">Inconnu</p>
-                  )}
-                </div>
-                <div>
-                  <p className="text-[10px] text-white/30 mb-1">Mère</p>
-                  {animal.mereNumero ? (
-                    <p className="text-xs font-mono text-white/70">{animal.mereNumero}</p>
-                  ) : (
-                    <p className="text-xs text-white/30">Inconnue</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+    {(animal.pereNumero ||
+      animal.mereNumero ||
+      animal.consanguin) && (
+      <div className="bg-white/[0.03] border border-white/8 rounded-xl p-5">
+        <h2 className="text-sm font-medium text-white mb-4">
+          Généalogie
+        </h2>
+
+        {animal.consanguin && (
+          <div
+            className="bg-amber-400/[0.08]
+                       border border-amber-400/20
+                       rounded-lg px-3 py-2
+                       text-xs text-amber-300 mb-3"
+          >
+            ⚠ Risque de consanguinité détecté
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-[10px] text-white/30 mb-1">
+              Père
+            </p>
+
+            {animal.pereNumero ? (
+              <p className="text-xs font-mono text-white/70">
+                {animal.pereNumero}
+              </p>
+            ) : (
+              <p className="text-xs text-white/30">
+                Inconnu
+              </p>
+            )}
+          </div>
+
+          <div>
+            <p className="text-[10px] text-white/30 mb-1">
+              Mère
+            </p>
+
+            {animal.mereNumero ? (
+              <p className="text-xs font-mono text-white/70">
+                {animal.mereNumero}
+              </p>
+            ) : (
+              <p className="text-xs text-white/30">
+                Inconnue
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+  </>
+)}
+
+{tab === "evenements" && (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <EvenementAnimalForm
+      animalId={animalId}
+      onSuccess={invalidate}
+    />
+
+    <EvenementHistory
+      evenements={evenements}
+    />
+  </div>
+)}
+
+{tab === "consommation" && (
+  <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
+
+      <AlimentationAnimalPanel animalId={animalId} />
+
+   
+  </div>
+)}
 
         </main>
       </div>

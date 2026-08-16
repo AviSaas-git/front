@@ -4,6 +4,7 @@ import { useState } from "react"
 import { FormField } from "@/components/ui/FormField"
 import { enregistrerPortee } from "@/lib/api/reproduction"
 import type { PorteeResult } from "@/lib/api/reproduction"
+import { toastSuccess, toastError, traduireErreur } from "@/lib/toast"
 
 type Props = {
   reproductionId: string; especeNom: string
@@ -45,9 +46,14 @@ export function PorteeForm({ reproductionId, especeNom, onSuccess, onCancel }: P
           ? Number(form.poidsMoyenNaissanceGrammes) : undefined,
         observations: form.observations || undefined,
       })
+
+      toastSuccess(
+        `Mise bas enregistrée — ${res.nombreNesVivants} né${res.nombreNesVivants > 1 ? "s" : ""} vivant${res.nombreNesVivants > 1 ? "s" : ""}. ` +
+        `${res.numerosAnimauxGeneres.length} fiches créées automatiquement.`
+      )
       setResultat(res)
     } catch (err: any) {
-      setError(err.response?.data?.message ?? "Erreur serveur.")
+  toastError(traduireErreur(err))
     } finally {
       setLoading(false)
     }
