@@ -30,7 +30,7 @@ export function StepFormBande({ espece, onBack }: Props) {
     fournisseur:     "",
   })
 
-  const [errors, setErrors]   = useState<Partial<BandeFormData>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof BandeFormData, string>>>({})
   const [loading, setLoading] = useState(false)
 
   // Charge les vrais bâtiments depuis l'API
@@ -147,9 +147,10 @@ export function StepFormBande({ espece, onBack }: Props) {
             label="Effectif initial"
             type="number"
             placeholder="Ex : 5 000"
-            value={form.effectifInitial || ""}
+            value={String(form.effectifInitial ?? "")}
             onChange={(e) => handleChange("effectifInitial", e.target.value)}
             error={errors.effectifInitial as string}
+            
           />
           <FormField
             label="Race"

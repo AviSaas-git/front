@@ -30,13 +30,21 @@ export function NouvelElevageShell({ onCancel }: Props) {
   if (!espece) return null
 
   return espece.modeGestion === "LOT" ? (
-    <StepFormBande
-      espece={espece}
-      onBack={() => setStep("espece")}
-    />
+  <StepFormBande espece={{ 
+        ...espece, 
+        gererReproduction: false, 
+        cycleMoyenJours: espece.cycleMoyenJours ?? 0, 
+        dureeGestationJours: espece.dureeGestationJours ?? 0 
+      }}
+      onBack={() => setStep("espece")}/>
   ) : (
     <StepFormAnimal
-      espece={espece}
+      espece={{ 
+        ...espece, 
+        gererReproduction: false, 
+        cycleMoyenJours: espece.cycleMoyenJours ?? 0, 
+        dureeGestationJours: espece.dureeGestationJours ?? 0 
+      }}
       onBack={() => setStep("espece")}
     />
   )
