@@ -53,10 +53,10 @@ export function StepChoixEspece({ onDone, onCancel }: Props) {
         <div className="grid grid-cols-2 gap-2.5 mb-5">
           {especes.map((esp) => (
             <EspeceCard
-              key={esp.id} // C'est maintenant le vrai UUID de la BDD !
-              espece={esp}
+              key={esp.id} 
+              espece={esp as unknown as EspeceConfig}
               selected={selected?.id === esp.id}
-              onClick={() => setSelected(esp)}
+              onClick={() => setSelected(esp as unknown as EspeceConfig)} // <-- CORRECTION ICI
             />
           ))}
         </div>
