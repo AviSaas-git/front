@@ -26,19 +26,25 @@ import { ConsommationForm } from "./ConsommationForm"
 import { AlimentationBandePanel } from "../alimentation/AlimentationBandePanel"
 
 import { PontePanel } from "./PontePanel"
+//
+import { VenteForm }           from "./VenteForm"
+import { RentabilitePanel }    from "./RentabilitePanel"
+import { ObjectifPanel }       from "./ObjectifPanel"
+import { ClotureBandeModal }   from "./ClotureBandeModal"
 
 
 type Props = { bandeId: string }
 
-type Tab = "mortalite" | "prophylaxie" | "pesee" | "finances" | "alimentation" | "ponte"
+type Tab = "mortalite" | "prophylaxie" | "pesee" | "finances"
+         | "alimentation" | "ponte" | "ventes" | "rentabilite" | "objectifs"
 
 export function BandeDetailShell({ bandeId }: Props) {
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const router = useRouter()
   const qc     = useQueryClient()
   const [ready, setReady] = useState(false)
   const [tab, setTab]     = useState<Tab>("mortalite")
-
+  const [showCloture, setShowCloture] = useState(false)
 
 
   useEffect(() => {
@@ -99,7 +105,7 @@ export function BandeDetailShell({ bandeId }: Props) {
     )
   }
 
-  const tauxColor = bande.tauxMortalite > 3 ? "text-rose-400" : "text-green-400"
+  const tauxColor = bande.tauxMortalite > 4 ? "text-rose-400" : "text-green-400"
 
   const estPondeuse = bande.especeNom.toLowerCase().includes("pondeuse")
 
@@ -124,6 +130,14 @@ export function BandeDetailShell({ bandeId }: Props) {
                       transition-colors self-start flex items-center gap-1">
             ⚙ Configurer la courbe de référence {bande.especeNom} →
           </a>
+          {bande.statut === "ACTIVE" && (
+              <button onClick={() => setShowCloture(true)}
+                className="px-3 py-1.5 bg-rose-400/10 hover:bg-rose-400/20
+                          text-rose-300 rounded-lg text-xs transition-colors
+                          self-start">
+                🔒 Clôturer la bande
+              </button>
+            )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="bg-white/[0.03] border border-white/[0.07] rounded-xl p-4">
@@ -178,6 +192,27 @@ export function BandeDetailShell({ bandeId }: Props) {
                             : "text-white/40 border-transparent hover:text-white/60"}`}>
               Finances
             </button>
+                          <button onClick={() => setTab("ventes")}
+                className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors
+                            ${tab === "ventes"
+                              ? "text-green-400 border-green-400"
+                              : "text-white/40 border-transparent hover:text-white/60"}`}>
+                Ventes
+              </button>
+              <button onClick={() => setTab("rentabilite")}
+                className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors
+                            ${tab === "rentabilite"
+                              ? "text-amber-400 border-amber-400"
+                              : "text-white/40 border-transparent hover:text-white/60"}`}>
+                Rentabilité
+              </button>
+              <button onClick={() => setTab("objectifs")}
+                className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors
+                            ${tab === "objectifs"
+                              ? "text-blue-400 border-blue-400"
+                              : "text-white/40 border-transparent hover:text-white/60"}`}>
+                Objectifs
+              </button>
 
 
 
@@ -260,7 +295,34 @@ export function BandeDetailShell({ bandeId }: Props) {
               </div>
             </div>
           )}
+          {tab === "ventes" && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <VenteForm
+                bandeId={bandeId}
+                effectifActuel={bande.effectifActuel}
+                onSuccess={invalidateAll}
+              />
+              {/* Historique des ventes depuis RentabilitePanel */}
+              <RentabilitePanel bandeId={bandeId} />
+            </div>
+          )}
 
+          {tab === "rentabilite" && (
+            <RentabilitePanel bandeId={bandeId} />
+          )}
+
+          {tab === "objectifs" && (
+            <ObjectifPanel bandeId={bandeId} />
+          )}
+
+         
+          {showCloture && (
+            <ClotureBandeModal
+              bandeId={bandeId}
+              effectifActuel={bande.effectifActuel}
+              onClose={() => setShowCloture(false)}
+            />
+          )}
 
         </main>
       </div>

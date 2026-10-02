@@ -151,3 +151,54 @@ export async function deleteBande(id: string): Promise<void> {
 export async function deleteMortalite(bandeId: string, mortaliteId: string): Promise<void> {
   await apiClient.delete(`/api/v1/bandes/${bandeId}/mortalites/${mortaliteId}`)
 }
+
+export type VenteBande = {
+  id: string; date: string; nombreAnimaux: number
+  poidsMoyenKg: number; prixParKg: number
+  montantTotal: number; acheteur: string | null; observations: string | null
+}
+
+export type RentabiliteData = {
+  recettesVentesAnimaux: number; recettesVentesOeufs: number
+  recettesTotales: number; chargesProduction: number
+  chargesFixes: number; chargesTotales: number
+  margeNette: number; margeParAnimal: number
+  margeParKgVendu: number; tauxMarge: number
+  coutProductionParAnimal: number; seuilRentabilite: number
+  estRentable: boolean
+  chargesParCategorie: Record<string, number>
+  ventesAnimaux: VenteBande[]
+}
+
+export type ObjectifData = {
+  id?: string
+  objectifPoidsFinKg?: number; objectifDureeCycle?: number
+  objectifTauxMortaliteMax?: number; objectifICMax?: number
+  objectifGainMoyenJour?: number; objectifPrixVenteKg?: number
+  objectifMargeNetteMin?: number; notes?: string
+  poidsActuelKg?: number; tauxMortaliteActuel?: number
+  progressionPct?: number; appreciationPoids?: string
+  appreciationMortalite?: string
+}   
+ 
+export const fetchVentesBande = (bandeId: string) =>
+  apiClient.get<VenteBande[]>(`/api/v1/bandes/${bandeId}/ventes`).then(r => r.data)
+
+export const createVenteBande = (bandeId: string, data: {
+  date: string; nombreAnimaux: number; poidsMoyenKg: number
+  prixParKg: number; acheteur?: string; observations?: string
+}) => apiClient.post<VenteBande>(`/api/v1/bandes/${bandeId}/ventes`, data).then(r => r.data)
+
+export const cloturerBande = (bandeId: string, data: {
+  dateSortie: string; motifCloture?: string; effectifVendu?: number
+  poidsMoyenKg?: number; prixParKg?: number; acheteur?: string; observations?: string
+}) => apiClient.post(`/api/v1/bandes/${bandeId}/cloturer`, data)
+
+export const fetchRentabilite = (bandeId: string) =>
+  apiClient.get<RentabiliteData>(`/api/v1/bandes/${bandeId}/rentabilite`).then(r => r.data)
+
+export const fetchObjectif = (bandeId: string) =>
+  apiClient.get<ObjectifData>(`/api/v1/bandes/${bandeId}/objectif`).then(r => r.data)
+
+export const saveObjectif = (bandeId: string, data: Partial<ObjectifData>) =>
+  apiClient.put<ObjectifData>(`/api/v1/bandes/${bandeId}/objectif`, data).then(r => r.data)

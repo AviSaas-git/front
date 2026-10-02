@@ -1,50 +1,60 @@
-import type { KpiItem, ElevageRow, AlertItem, } from "@/lib/types/dashboard"
-import { 
-  IconLayoutDashboard, 
-  IconFeather, 
-  IconPaw, 
-  IconHeartRateMonitor, 
-  IconDna, 
-  IconPackage, 
-  IconReportAnalytics, 
-  IconWheat, 
-  IconBuildingPlus, 
-  IconHomePlus, 
-  IconSettings, 
-  IconProps
-} from '@tabler/icons-react'
+import type { KpiItem, ElevageRow, AlertItem } from "@/lib/types/dashboard"
+import type { ForwardRefExoticComponent, RefAttributes } from "react"
+import {
+  IconLayoutDashboard,
+  IconFeather,
+  IconPaw,
+  IconHeartRateMonitor,
+  IconDna,
+  IconPackage,
+  IconReportAnalytics,
+  IconWheat,
+  IconBuildingPlus,
+  IconHomePlus,
+  IconSettings,
+  type IconProps,
+} from "@tabler/icons-react"
 
-import { ForwardRefExoticComponent, RefAttributes } from "react";
+// ─────────────────────────────────────────────────────────────────────────────
+// Types de navigation
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type TablerIcon = ForwardRefExoticComponent<
+  IconProps & RefAttributes<SVGSVGElement>
+>
 
 export interface NavChild {
-  label: string;
-  href: string;
-  icon: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
-  badge?: string | number; // Optionnel
+  label: string
+  href: string
+  icon: TablerIcon
+  badge?: string | number
 }
 
 export interface NavItem {
-  label: string;
-  href: string; // Optionnel si l'élément a des enfants
-  icon: any;
-  section?: string; // Optionnel
-  badge?: string | number; // Optionnel
-  children?: NavChild[]; // Optionnel
+  label: string
+  href: string
+  icon: TablerIcon
+  section?: string
+  badge?: string | number
+  children?: NavChild[]
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Données du dashboard
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const KPIS: KpiItem[] = [
   {
-    label:      "Bandes actives",
-    value:      "3",
-    sub:        "↑ +1 ce mois",
-    subColor:   "text-green-400",
+    label:    "Bandes actives",
+    value:    "3",
+    sub:      "↑ +1 ce mois",
+    subColor: "text-green-400",
   },
   {
-    label:      "Porcs suivis",
-    value:      "47",
-    sub:        "12 reproductrices",
-    subColor:   "text-white/30",
+    label:    "Porcs suivis",
+    value:    "47",
+    sub:      "12 reproductrices",
+    subColor: "text-white/30",
   },
   {
     label:      "Mortalité moy.",
@@ -106,26 +116,40 @@ export const ALERTS: AlertItem[] = [
   { id: "2", message: "Pesée hebdomadaire due — BAND-2025-012" },
 ]
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Navigation principale (Sidebar)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const NAV_ITEMS: NavItem[] = [
-  { section: "PRINCIPAL",  label: "Tableau de bord",   href: "/dashboard",        icon: IconLayoutDashboard },
-  {                        label: "Bandes",            href: "/bandes",           icon: IconFeather },
-  {                        label: "Animaux",           href: "/animaux",          icon: IconPaw },
-  {                        label: "Santé",             href: "/sante",            icon: IconHeartRateMonitor },
-  {                        label: "Reproduction",      href: "/reproduction",     icon: IconDna },
-  { section: "GÉRER",      label: "Stocks",            href: "/stock",           icon: IconPackage },
-  {                        label: "Rapports",          href: "/apports",         icon: IconReportAnalytics },
-  { section: "GESTION",    label: "Alimentation",      href: "/alimentation",     icon: IconWheat },
-  { section: "CONFIGURER", label: "Ajouter une ferme",   href: "/fermes/nouveau",   icon: IconBuildingPlus },
-  {                        label: "Ajouter un bâtiment", href: "/batiments/nouveau",icon: IconHomePlus },
-  {                        label: "Paramètres",          href: "/parametres",       icon: IconSettings },
+  // ── PRINCIPAL ──────────────────────────────────────────────────────────
+  { section: "PRINCIPAL",  label: "Tableau de bord",     href: "/dashboard",         icon: IconLayoutDashboard },
+  {                        label: "Bandes",              href: "/bandes",            icon: IconFeather },
+  {                        label: "Bâtiments",           href: "/batiments",         icon: IconHomePlus },
+  {                        label: "Animaux",             href: "/animaux",           icon: IconPaw },
+  {                        label: "Santé",               href: "/sante",             icon: IconHeartRateMonitor },
+  {                        label: "Reproduction",        href: "/reproduction",      icon: IconDna },
+
+  // ── GÉRER ──────────────────────────────────────────────────────────────
+  { section: "GÉRER",      label: "Stocks",              href: "/stock",             icon: IconPackage },
+  {                        label: "Alimentation",        href: "/alimentation",      icon: IconWheat },
+  {                        label: "Rapports",            href: "/apports",           icon: IconReportAnalytics },
+
+  // ── CONFIGURER ─────────────────────────────────────────────────────────
+  { section: "CONFIGURER", label: "Ajouter une ferme",   href: "/fermes/nouveau",    icon: IconBuildingPlus },
+  {                        label: "Ajouter un bâtiment", href: "/batiments/nouveau", icon: IconHomePlus },
+  {                        label: "Paramètres",          href: "/parametres",        icon: IconSettings },
 ]
-// Couleurs selon statut — centralisées ici
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Styles centralisés
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const STATUT_STYLES: Record<string, { label: string; className: string }> = {
-  ACTIVE:        { label: "Active",        className: "bg-green-400/10  text-green-300"  },
-  GESTANTE:      { label: "Gestante",      className: "bg-amber-400/10  text-amber-300"  },
-  ALLAITANTE:    { label: "Allaitante",    className: "bg-green-400/10  text-green-300"  },
-  CLOTURE_PROCHE:{ label: "Clôture proche",className: "bg-white/8       text-white/40"   },
-  CLOTUREE:      { label: "Clôturée",      className: "bg-white/5       text-white/30"   },
+  ACTIVE:         { label: "Active",         className: "bg-green-400/10  text-green-300" },
+  GESTANTE:       { label: "Gestante",       className: "bg-amber-400/10  text-amber-300" },
+  ALLAITANTE:     { label: "Allaitante",     className: "bg-green-400/10  text-green-300" },
+  CLOTURE_PROCHE: { label: "Clôture proche", className: "bg-white/8       text-white/40"  },
+  CLOTUREE:       { label: "Clôturée",       className: "bg-white/5       text-white/30"  },
 }
 
 export const MODE_STYLES: Record<string, { className: string }> = {
@@ -133,7 +157,6 @@ export const MODE_STYLES: Record<string, { className: string }> = {
   INDIVIDUEL: { className: "bg-violet-400/10  text-violet-300" },
 }
 
-// Couleur de la barre de progression selon le statut
 export const PROG_COLOR: Record<string, string> = {
   ACTIVE:         "bg-green-400",
   ALLAITANTE:     "bg-green-400",

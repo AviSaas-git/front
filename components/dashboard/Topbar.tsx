@@ -3,13 +3,22 @@ import Link from "next/link"
 type Props = {
   title:    string
   subtitle?: string
+  onMenuClick?: () => void
 }
 
-export function Topbar({ title, subtitle }: Props) {
+export function Topbar({ title, subtitle, onMenuClick }: Props) {
   return (
     <header className="flex items-center justify-between
                        px-5 py-3 border-b border-white/[0.07]
                        shrink-0">
+       <button 
+          onClick={onMenuClick}
+          className="p-1 -ml-1 text-white/40 hover:text-white md:hidden transition-colors"
+        >
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
       <div>
         <h1 className="text-[15px] font-medium text-white">
           {title}

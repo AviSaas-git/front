@@ -27,10 +27,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
     // Persiste les deux dans localStorage
     localStorage.setItem("avisaas_token", token)
     localStorage.setItem("avisaas_user", JSON.stringify(user))
-     console.log("Token sauvegardé :", token.substring(0, 20) + "...")
-       console.log("SET AUTH EXECUTE")
-      console.log(user)
-     console.log(token)
+     //  console.log("Token sauvegardé :", token.substring(0, 20) + "...")
+     //  console.log("SET AUTH EXECUTE")
+     // console.log(user)
+    // console.log(token)
     set({ user, token, isLogged: true })
   },
 

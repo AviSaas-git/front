@@ -19,6 +19,9 @@ export function DashboardShell() {
     // ← indique que le client est prêt
   const [ready, setReady] = useState(false)
 
+  // Contrôle l'affichage du sidebar
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
+
    useEffect(() => {
     hydrate()           // recharge user + token depuis localStorage
     setReady(true)      // débloque les requêtes
@@ -45,6 +48,8 @@ export function DashboardShell() {
         <Topbar
           title="Tableau de bord"
           subtitle={`${user?.nom ?? "..."} · ${today}`}
+
+          onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
         />
         <main className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
           <AlertBanner />
